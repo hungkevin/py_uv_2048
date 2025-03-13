@@ -1,0 +1,137 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+#game-board {
+    margin: 20px auto;
+    border: 2px solid #333;
+    display: grid;
+    background-color: #bbada0; /* 棋盤背景顏色 */
+    border-radius: 8px; /* 圓角 */
+    transition: width 0.3s, height 0.3s; /* 添加過渡動畫 */
+    box-sizing: border-box; /* 確保padding包含在寬高內 */
+    /* 寬高將由 script.js 根據棋盤尺寸設定 */
+}
+
+.grid-cell {
+    /* 完全移除對 grid-cell 的寬高限制，讓 JS 完全控制尺寸 */
+    border: 1px solid #ccc;
+    text-align: center;
+    font-weight: bold;
+    margin: 2px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(238, 228, 218, 0.35); /* 空格子背景色 */
+    box-sizing: border-box; /* 確保border包含在寬高內 */
+}
+
+#size-buttons {
+    margin: 10px auto;
+    text-align: center;
+}
+
+#size-buttons button {
+    padding: 16px 32px;
+    font-size: 1.5em;
+    margin: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#new-game-button {
+    padding: 16px 32px;
+    font-size: 1.5em;
+    margin: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* 加大分數顯示的文字大小 */
+#score-display {
+    font-size: 1.8em;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+#score {
+    color: #776e65;
+    font-size: 1.2em;
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* 增大儲存分數Modal的文字大小 */
+.modal-content h2 {
+    font-size: 2em;
+    margin-bottom: 15px;
+}
+
+.modal-content p {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+.modal-content label {
+    font-size: 1.5em;
+    display: block;
+    margin: 10px 0;
+}
+
+#player-name {
+    font-size: 1.5em;
+    padding: 8px;
+    width: 80%;
+    margin-bottom: 20px;
+    border: 2px solid #bbada0;
+    border-radius: 5px;
+}
+
+.modal-content button {
+    font-size: 1.5em;
+    padding: 10px 20px;
+    margin: 0 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #8f7a66;
+    color: white;
+    border: none;
+}
+
+.modal-content button:hover {
+    background-color: #9f8b76;
+}
