@@ -3,18 +3,25 @@
 <head>
     <title>2048 遊戲</title>
     <link rel="stylesheet" href="static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
     <h1>2048 遊戲</h1>
-    <div id="game-board">
-        <!-- 棋盤將在此生成 -->
-    </div>
-    <p id="score-display">分數: <span id="score">0</span></p>
-    <button id="new-game-button">新遊戲</button>
-    <div id="size-buttons">
-        <button id="small-board-button">小棋盤</button>
-        <button id="medium-board-button">中棋盤</button>
-        <button id="large-board-button">大棋盤</button>
+    <div id="game-container">
+        <div id="game-board">
+            <!-- 棋盤將在此生成 -->
+        </div>
+        <div id="score-display">分數: <span id="score">0</span></div>
+        <div id="control-buttons">
+            <button id="zoom-out-button" class="game-button">縮小</button>
+            <button id="new-game-button" class="game-button">新遊戲</button>
+            <button id="zoom-in-button" class="game-button">放大</button>
+        </div>
+        <div id="size-buttons">
+            <button id="small-board-button" class="game-button">小棋盤</button>
+            <button id="medium-board-button" class="game-button">中棋盤</button>
+            <button id="large-board-button" class="game-button">大棋盤</button>
+        </div>
     </div>
 
     <!-- 儲存分數彈窗 -->
@@ -25,8 +32,10 @@
             <p>您的分數: <span id="modal-score">0</span></p>
             <label for="player-name">您的姓名：</label>
             <input type="text" id="player-name" name="player-name">
-            <button id="save-button">儲存</button>
-            <button id="cancel-button">取消</button>
+            <div class="button-container">
+                <button id="save-button" class="game-button">儲存</button>
+                <button id="cancel-button" class="game-button">取消</button>
+            </div>
         </div>
     </div>
 

@@ -19,6 +19,16 @@ const smallBoardButton = document.getElementById("small-board-button");
 const mediumBoardButton = document.getElementById("medium-board-button");
 const largeBoardButton = document.getElementById("large-board-button");
 
+// 新增全域變數，用于缩放功能
+let scaleFactor = 1.0; // 初始缩放比例
+const MIN_SCALE = 0.5; // 最小缩放比例
+const MAX_SCALE = 1.5; // 最大缩放比例
+const SCALE_STEP = 0.1; // 每次缩放步长
+
+// 在DOM元素引用部分添加
+const zoomInButton = document.getElementById("zoom-in-button");
+const zoomOutButton = document.getElementById("zoom-out-button");
+
 // 初始化遊戲，建立棋盤並隨機加入兩個數字
 function init() {
     board = [];
@@ -60,6 +70,30 @@ function init() {
     updateScore();
 
     console.log(`棋盤尺寸已變更為 ${boardSize}x${boardSize}`); // 調試用
+
+    // 创建游戏容器如果不存在
+    let gameContainer = document.getElementById("game-container");
+    if (!gameContainer) {
+        // 如果容器不存在，创建一个，并把棋盘及相关元素移到里面
+        gameContainer = document.createElement("div");
+        gameContainer.id = "game-container";
+        const gameBoardParent = gameBoard.parentNode;
+
+        // 找出所有需要包含在game-container中的元素
+        const scoreDisplay = document.getElementById("score-display");
+        const controlButtons = document.getElementById("control-buttons");
+        const sizeButtons = document.getElementById("size-buttons");
+
+        // 移动元素到新容器
+        gameBoardParent.insertBefore(gameContainer, gameBoard);
+        gameContainer.appendChild(gameBoard);
+        gameContainer.appendChild(scoreDisplay);
+        gameContainer.appendChild(controlButtons);
+        gameContainer.appendChild(sizeButtons);
+    }
+
+    // 应用当前缩放比例
+    applyScale();
 }
 
 // 建立棋盤的 HTML 顯示，每個格子根據數值設定背景與文字顏色
@@ -103,13 +137,19 @@ function addNumber() {
 
 // 遊戲結束處理，顯示儲存分數 Modal
 function endGame() {
+    // 再次确保分数显示是最新的
+    updateScore();
+
+    // 记录日志以便调试
+    console.log(`游戏结束处理，当前分数: ${score}，HTML显示分数: ${scoreElement.textContent}`);
+
     if (gameWon) {
         alert(`恭喜！您達到了 2048！分數: ${score}`);
     } else {
         alert(`遊戲結束！分數: ${score}`);
     }
 
-    // 更新Modal內的分數顯示
+    // 確保模態框中顯示的分數與遊戲當前分數完全一致
     modalScoreElement.textContent = score;
 
     // 不管是勝利或失敗，都顯示儲存分數視窗
@@ -127,16 +167,25 @@ function slide(row) {
 
 // 輔助函式：合併相鄰同值，依據 row 長度執行
 function merge(row) {
+    let scoreAdded = 0; // 记录本次合并增加的分数
+
     for (let i = 0; i < row.length - 1; i++) {
         if (row[i] !== 0 && row[i] === row[i + 1]) {
             row[i] *= 2;
-            score += row[i];
+            scoreAdded += row[i]; // 累计增加的分数
             row[i + 1] = 0;
             if (row[i] === 2048) {
                 gameWon = true;
             }
         }
     }
+
+    // 在合并完成后更新总分
+    if (scoreAdded > 0) {
+        score += scoreAdded;
+        console.log(`合并增加分数: ${scoreAdded}，当前总分: ${score}`);
+    }
+
     return row;
 }
 
@@ -152,6 +201,7 @@ function processRow(row) {
 function move(direction) {
     const previous = JSON.stringify(board);
     let newBoard = board.map(row => row.slice());
+    let scoreBeforeMove = score; // 记录移动前的分数
 
     // 針對上、下方向先進行轉置，右、下則反轉每列
     if (direction === 'up' || direction === 'down') {
@@ -174,9 +224,18 @@ function move(direction) {
     if (JSON.stringify(board) !== previous) {
         addNumber();
         updateBoard();
+
+        // 先更新分数显示
         updateScore();
+
+        // 检查游戏是否结束前记录最新分数
         if (isGameOver()) {
-            endGame();
+            console.log(`游戏结束，最终得分: ${score}，移动前得分: ${scoreBeforeMove}`);
+
+            // 确保HTML界面上的分数显示已更新
+            setTimeout(() => {
+                endGame();
+            }, 50); // 添加小延迟确保DOM更新
         }
     }
 }
@@ -186,9 +245,18 @@ function transpose(matrix) {
     return matrix[0].map((_, i) => matrix.map(row => row[i]));
 }
 
-// 更新分數顯示
+// 更新分數顯示 - 确保所有地方的分数显示都同步
 function updateScore() {
+    // 更新主界面的分數
     scoreElement.textContent = score;
+
+    // 同時更新模態框中的分數顯示
+    if (modalScoreElement) {
+        modalScoreElement.textContent = score;
+    }
+
+    // 输出日志便于调试
+    console.log(`分数已更新: ${score}`);
 }
 
 // 判斷是否無法移動
@@ -321,7 +389,7 @@ largeBoardButton.addEventListener('click', () => {
     init();
 });
 
-// 實現 saveScore 函數
+// 實現 saveScore 函數 - 確保使用最新分數
 async function saveScore() {
     const playerName = playerNameInput.value.trim();
 
@@ -329,6 +397,9 @@ async function saveScore() {
         alert('請輸入您的名字！');
         return;
     }
+
+    // 再次確認模態框中的分數與當前分數一致
+    modalScoreElement.textContent = score;
 
     await saveScoreWithDefault(playerName);
 }
@@ -338,8 +409,8 @@ async function saveScoreWithDefault(playerName) {
     try {
         const currentTime = Date.now();
 
-        // 调试输出
-        console.log(`准备发送数据: name=${playerName}, time=${currentTime}, score=${score}, is_success=${gameWon}`);
+        // 調試輸出，確認保存時使用的分數值
+        console.log(`准备保存数据: name=${playerName}, score=${score}, is_success=${gameWon}`);
 
         // 构建FormData对象，让浏览器自动处理Content-Type
         const formData = new FormData();
@@ -380,3 +451,30 @@ async function saveScoreWithDefault(playerName) {
         alert('儲存分數時發生錯誤，請重試！詳情請查看控制台');
     }
 }
+
+// 应用缩放比例函数
+function applyScale() {
+    const gameContainer = document.getElementById("game-container");
+    gameContainer.style.transform = `scale(${scaleFactor})`;
+    gameContainer.style.transformOrigin = "top center";
+}
+
+// 放大函数
+function zoomIn() {
+    if (scaleFactor < MAX_SCALE) {
+        scaleFactor += SCALE_STEP;
+        applyScale();
+    }
+}
+
+// 缩小函数
+function zoomOut() {
+    if (scaleFactor > MIN_SCALE) {
+        scaleFactor -= SCALE_STEP;
+        applyScale();
+    }
+}
+
+// 添加放大缩小按钮事件监听
+zoomInButton.addEventListener('click', zoomIn);
+zoomOutButton.addEventListener('click', zoomOut);
